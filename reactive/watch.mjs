@@ -22,7 +22,12 @@ function watch(source, cb, options = {}) {
     {
       lazy: true,
       scheduler() {
-        job()
+        if (options.flush === 'post') {
+          const p = Promise.resolve()
+          p.then(job)
+        } else {
+          job()
+        }
       }
     }
   )
@@ -32,7 +37,6 @@ function watch(source, cb, options = {}) {
   } else {
     oldValue = effectFn()
   }
-  oldValue = effectFn()
 }
 
 const obj = reactive({ foo: 1, bar: 2 })
@@ -43,7 +47,8 @@ watch(obj, (newValue, oldValue) => {
   // console.log(`数据发生变化了, new: ${newValue.bar}, old: ${oldValue.bar}`)
 }, {
   // immediate 属性表示传递给watch的函数是否立即执行
-  immediate: true
+  immediate: false,
+  flush: 'post' // pre | post:等待DOM更新结束后再执行
 })
 
 obj.foo = obj.foo + 3
