@@ -5,7 +5,8 @@
   "scripts": {
     "re": "node ./reactive/reactive.mjs",
     "computed": "node ./reactive/computed.mjs",
-    "watch": "node ./reactive/watch.mjs"
+    "watch": "node ./reactive/watch.mjs",
+    "parse": "node ./compiler/parse.mjs"
   },
   "keywords": [],
   "author": "",
