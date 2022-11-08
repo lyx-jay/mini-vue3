@@ -13,7 +13,11 @@ function isAlpha(char) {
   return char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z'
 }
 
-// 接收模板字符串作为参数，并将模版切割为 token 返回
+/**
+ * 解析模板字符串，返回 tokens 数组
+ * @param {String} str 模板字符串
+ * @returns Array
+ */
 export function tokeniz(str) {
   // 状态机的当前状态：初始状态
   let currentState = State.initial
@@ -99,10 +103,13 @@ export function tokeniz(str) {
   return tokens
 }
 
-
+/**
+ * 将模板字符串解析为 模板AST
+ * @param {String} str 模板字符串
+ * @returns Object
+ */
 export function parse(str) {
   const tokens = tokeniz(str)
-  // console.log(tokens)
   const root = {
     type: 'Root',
     children: []
@@ -182,7 +189,7 @@ export function traverseNode(ast, context) {
   }
 
   let i = exitFns.length
-  while(i--) {
+  while (i--) {
     exitFns[i]()
   }
 }
