@@ -6,7 +6,8 @@
     "re": "node ./reactive/reactive.mjs",
     "computed": "node ./reactive/computed.mjs",
     "watch": "node ./reactive/watch.mjs",
-    "parse": "node ./compiler/parse.mjs"
+    "parse": "node ./compiler/parse.mjs",
+    "compile": "node ./compiler/compile.mjs"
   },
   "keywords": [],
   "author": "",

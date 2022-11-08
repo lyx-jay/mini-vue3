@@ -160,16 +160,29 @@ export function dump(node, indent = 0) {
  * @param {Object} context 上下文
  */
 export function traverseNode(ast, context) {
-  const currentAst = ast
+  context.currentNode = ast
+  const exitFns = []
   const transforms = context.nodeTransforms
   for (let i = 0; i < transforms.length; i++) {
-    transforms[i](currentAst, context)
+    const onExit = transforms[i](context.currentNode, context)
+    if (onExit) {
+      // 将推出阶段的回调函数添加到 exitFns 数组中
+      exitFns.push(onExit)
+    }
+    if (!context.currentNode) return
   }
 
-  const children = currentAst.children
+  const children = context.currentNode.children
   if (children) {
     for (let i = 0; i < children.length; i++) {
+      context.parent = context.currentNode
+      context.childIndex = i
       traverseNode(children[i], context)
     }
+  }
+
+  let i = exitFns.length
+  while(i--) {
+    exitFns[i]()
   }
 }
