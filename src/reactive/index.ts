@@ -1,11 +1,19 @@
 import { reactive, effect } from '../utils/index'
-
+let content: string = ''
 const obj = reactive({
-  foo: 1
+  ok: true,
+  text: 'hello'
 })
 
 effect(() => {
-  console.log(obj.foo)
+  content = obj.ok ? obj.text : 'world'
 })
 
-obj.foo++
+
+setTimeout(() => {
+  obj.ok = false
+}, 1000);
+
+setTimeout(() => {
+  obj.text = 'vue'
+}, 2000)

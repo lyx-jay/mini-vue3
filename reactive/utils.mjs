@@ -64,7 +64,7 @@ export function track(target, key) {
 
 // 数据更新函数
 export function trigger(target, key) {
-  
+
   const depsMap = bucket.get(target)
   if (!depsMap) return
   const effects = depsMap.get(key)
@@ -159,7 +159,7 @@ export function computed(getter) {
     // 读取 value 时才执行 effectFn 函数
     get value() {
       if (dirty) {
-        value = effectFn() 
+        value = effectFn()
         dirty = false
       }
       track(obj, 'value')

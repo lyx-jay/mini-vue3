@@ -11,9 +11,16 @@ type DepsMap = Map<string, FnDeps>
 /** 副作用函数依赖集合 */
 type FnDeps = Set<Function>
 
+/** 根本数据类型 */
 type Bucket = WeakMap<OriginalData, DepsMap>
 
-let activeEffectFn: Function
+
+type EffectFn = {
+  (): void
+  deps: FnDeps[]
+}
+
+let activeEffectFn: EffectFn
 let bucket: Bucket = new WeakMap()
 
 /**
@@ -39,11 +46,23 @@ export function reactive(data: OriginalData) {
  * 注册副作用函数
  */
 export function effect(fn: Function) {
-  const effectFn = () => {
-    activeEffectFn = fn
+  const effectFn: EffectFn = () => {
+    cleanup(effectFn)
+    activeEffectFn = effectFn
     fn()
   }
+
+  effectFn.deps = []
   effectFn()
+}
+
+function cleanup(effectFn: EffectFn) {
+  console.log('cleanup')
+  for (let i = 0; i < effectFn.deps.length; i++) {
+    const deps = effectFn.deps[i]
+    deps.delete(effectFn)
+  }
+  effectFn.deps.length = 0
 }
 
 /**
@@ -52,6 +71,7 @@ export function effect(fn: Function) {
  * @param key 键值
  */
 function track(target: OriginalData, key: string) {
+  console.log('key', key)
   if (!activeEffectFn) return
   let depsMap = bucket.get(target)
   if (!depsMap) {
@@ -62,15 +82,19 @@ function track(target: OriginalData, key: string) {
     depsMap.set(key, deps = new Set())
   }
   deps.add(activeEffectFn)
+  activeEffectFn.deps.push(deps)
 }
 
 
 function trigger(target: OriginalData, key: string) {
   let depsMap = bucket.get(target)
   if (!depsMap) return
+
   let deps = depsMap.get(key)
   if (!deps) return
-  deps.forEach(fn => fn())
+  // 构造新的deps执行，就不会出现无限循环的问题啦
+  let newdeps = new Set(deps)
+  newdeps.forEach(fn => fn())
 }
 
 
