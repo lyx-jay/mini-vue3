@@ -7,12 +7,17 @@
     "computed": "node ./reactive/computed.mjs",
     "watch": "node ./reactive/watch.mjs",
     "parse": "node ./compiler/parse.mjs",
-    "compile": "node ./compiler/compile.mjs"
+    "compile": "node ./compiler/compile.mjs",
+    "reactive": "ts-node src/reactive/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "vitest": "^0.24.3"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
   }
 }
