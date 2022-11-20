@@ -9,19 +9,23 @@ interface OriginalData {
 type DepsMap = Map<string, FnDeps>
 
 /** 副作用函数依赖集合 */
-type FnDeps = Set<Function>
+type FnDeps = Set<EffectFn>
 
 /** 根本数据类型 */
 type Bucket = WeakMap<OriginalData, DepsMap>
 
 
-type EffectFn = {
+export type EffectFn = {
   (): void
   deps: FnDeps[]
+  options: {
+    [key: string]: any
+  }
 }
 
 let activeEffectFn: EffectFn
 let bucket: Bucket = new WeakMap()
+const activeEffectStack: EffectFn[] = []
 
 /**
  * 构造响应式数据
@@ -45,19 +49,24 @@ export function reactive(data: OriginalData) {
 /**
  * 注册副作用函数
  */
-export function effect(fn: Function) {
+export function effect(fn: Function, options = {}) {
   const effectFn: EffectFn = () => {
     cleanup(effectFn)
     activeEffectFn = effectFn
+    activeEffectStack.push(effectFn)
     fn()
+    activeEffectStack.pop()
+    activeEffectFn = activeEffectStack[activeEffectStack.length - 1]
   }
 
   effectFn.deps = []
+  effectFn.options = options
   effectFn()
 }
 
+// 清除依赖集合中的副作用函数
 function cleanup(effectFn: EffectFn) {
-  console.log('cleanup')
+  // console.log('cleanup')
   for (let i = 0; i < effectFn.deps.length; i++) {
     const deps = effectFn.deps[i]
     deps.delete(effectFn)
@@ -71,7 +80,7 @@ function cleanup(effectFn: EffectFn) {
  * @param key 键值
  */
 function track(target: OriginalData, key: string) {
-  console.log('key', key)
+  // console.log('key', key)
   if (!activeEffectFn) return
   let depsMap = bucket.get(target)
   if (!depsMap) {
@@ -85,16 +94,25 @@ function track(target: OriginalData, key: string) {
   activeEffectFn.deps.push(deps)
 }
 
-
+// 触发副作用函数执行
 function trigger(target: OriginalData, key: string) {
   let depsMap = bucket.get(target)
   if (!depsMap) return
 
-  let deps = depsMap.get(key)
-  if (!deps) return
+  let effects = depsMap.get(key)
+  if (!effects) return
   // 构造新的deps执行，就不会出现无限循环的问题啦
-  let newdeps = new Set(deps)
-  newdeps.forEach(fn => fn())
+  let effectsToRun = new Set(effects)
+  effectsToRun.forEach(fn => {
+    // 当fn不等于自身时才调用函数，避免调用自身引起的无限调用问题
+    if (fn !== activeEffectFn) {
+      if (fn.options.scheduler) {
+        fn.options.scheduler(fn)
+      } else {
+        fn()
+      }
+    }
+  })
 }
 
 

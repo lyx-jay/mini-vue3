@@ -1,19 +1,21 @@
-import { reactive, effect } from '../utils/index'
-let content: string = ''
+import { reactive, effect, jobQueue, flushjob } from '../utils/index'
+import { EffectFn } from '../utils/index'
 const obj = reactive({
-  ok: true,
-  text: 'hello'
+  foo: 1,
+})
+effect(function () {
+  console.log(obj.foo)
+}, {
+  // scheduler 只有在trigger时才会触发
+  scheduler(fn?: EffectFn) {
+    fn && jobQueue.add(fn)
+    flushjob()
+    // setTimeout(() => {
+      // fn && fn()
+    // })
+  }
 })
 
-effect(() => {
-  content = obj.ok ? obj.text : 'world'
-})
-
-
-setTimeout(() => {
-  obj.ok = false
-}, 1000);
-
-setTimeout(() => {
-  obj.text = 'vue'
-}, 2000)
+obj.foo++
+// console.log('结束了')
+obj.foo++
