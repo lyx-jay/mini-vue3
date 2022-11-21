@@ -23,6 +23,10 @@ export type EffectFn = {
   }
 }
 
+type Options = {
+  [key: string]: any
+}
+
 let activeEffectFn: EffectFn
 let bucket: Bucket = new WeakMap()
 const activeEffectStack: EffectFn[] = []
@@ -49,19 +53,26 @@ export function reactive(data: OriginalData) {
 /**
  * 注册副作用函数
  */
-export function effect(fn: Function, options = {}) {
+export function effect(fn: Function, options: Options = {}) {
   const effectFn: EffectFn = () => {
     cleanup(effectFn)
     activeEffectFn = effectFn
     activeEffectStack.push(effectFn)
-    fn()
+    // res 用来存储fn函数计算的值
+    const res = fn()
     activeEffectStack.pop()
     activeEffectFn = activeEffectStack[activeEffectStack.length - 1]
+    return res
   }
 
   effectFn.deps = []
   effectFn.options = options
-  effectFn()
+  if (!options.lazy) {
+    effectFn()
+  } else {
+
+    return effectFn
+  }
 }
 
 // 清除依赖集合中的副作用函数

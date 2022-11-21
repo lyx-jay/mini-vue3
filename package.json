@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "re": "node ./reactive/reactive.mjs",
-    "computed": "node ./reactive/computed.mjs",
+    "computed": "ts-node src/reactive/computed.ts",
     "watch": "node ./reactive/watch.mjs",
     "parse": "node ./compiler/parse.mjs",
     "compile": "node ./compiler/compile.mjs",
