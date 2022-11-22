@@ -5,7 +5,7 @@
   "scripts": {
     "re": "node ./reactive/reactive.mjs",
     "computed": "ts-node src/reactive/computed.ts",
-    "watch": "node ./reactive/watch.mjs",
+    "watch": "ts-node src/reactive/watch.ts",
     "parse": "node ./compiler/parse.mjs",
     "compile": "node ./compiler/compile.mjs",
     "reactive": "ts-node src/reactive/index.ts"
