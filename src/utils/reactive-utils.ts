@@ -90,7 +90,7 @@ function cleanup(effectFn: EffectFn) {
  * @param target 原始数据对象
  * @param key 键值
  */
-function track(target: OriginalData, key: string) {
+export function track(target: OriginalData, key: string) {
   // console.log('key', key)
   if (!activeEffectFn) return
   let depsMap = bucket.get(target)
@@ -106,7 +106,7 @@ function track(target: OriginalData, key: string) {
 }
 
 // 触发副作用函数执行
-function trigger(target: OriginalData, key: string) {
+export function trigger(target: OriginalData, key: string) {
   let depsMap = bucket.get(target)
   if (!depsMap) return
 

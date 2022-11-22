@@ -1,16 +1,30 @@
-// 计算属性是scheduler的利用
-// 计算属性的特性是在读取值时才会真正开始计算，也就是按需计算
-import { effect, reactive } from '../utils/reactive-utils'
+// 计算属性是利用scheduler实现的
+// 1. 在读取值时才会真正开始计算，也就是按需计算
+// 2. 如果值不发生变化，不会重新计算, computed 默认只会计算一次，如果需要重新计算，是需要给定参数
+import { effect, reactive, trigger, track } from '../utils/reactive-utils'
 
 export function computed(fn: any) {
+  // value 用来缓存上一次计算的值
   let value: any
+  // dirty 表示是否需要重新计算，为 true 意味着 “脏”，表示需要计算
+  let dirty: boolean = true
   const effectFn = effect(fn, {
-    lazy: true
+    lazy: true,
+    scheduler() {
+      if (!dirty) {
+        dirty = true
+        trigger(obj, 'value')
+      }
+    }
   })
 
   const obj = {
     get value() {
-      value = effectFn && effectFn()
+      if (dirty) {
+        value = effectFn && effectFn()
+        dirty = false
+      }
+      track(obj, 'value')
       return value
     }
   }
@@ -18,14 +32,20 @@ export function computed(fn: any) {
 }
 
 
-const obj = reactive({
+const data = reactive({
   foo: 1,
   bar: 2
 })
 
 const res = computed(() => {
-  return obj.foo + obj.bar
+  return data.foo + data.bar
 })
 
 
-console.log(res.value)
+effect(() => {
+  console.log(res.value)
+})
+
+// console.log(res.value)
+
+data.foo = 4

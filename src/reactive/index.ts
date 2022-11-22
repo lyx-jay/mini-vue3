@@ -1,5 +1,6 @@
 import { reactive, effect, jobQueue, flushjob } from '../utils/index'
 import { EffectFn } from '../utils/index'
+
 const obj = reactive({
   foo: 1,
 })
