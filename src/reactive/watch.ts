@@ -9,12 +9,22 @@ const obj = reactive({
 
 type Options = {
   immediate?: boolean
+  /**
+   * post: 表示等待dom 更新结束后在执行
+   */
+  flush?: 'post' | 'pre'
 }
 
 // 读取响应式数据时，会和副作用函数建立联系，但是当副作用函数的options中存在scheduler时，会执行scheduler函数
 export function watch(source: any, cb: Function, options: Options = {}) {
 
   let getter: Function
+  // 新值
+  let newValue: any
+  // 旧值
+  let oldValue: any
+  // 判断source是不是函数，如果是函数，直接给getter
+  // 如果不是，调用 traverser 函数，读取对象的每一个属性
   if (typeof source === 'function') {
     getter = source
   } else {
@@ -22,29 +32,43 @@ export function watch(source: any, cb: Function, options: Options = {}) {
   }
 
   const job = () => {
-    cb()
+    // 执行 effectFn 获得最新的值
+    newValue = effectFn()
+    // 执行回调函数
+    cb(newValue, oldValue)
+    // 将新值更新为旧值
+    oldValue = newValue
   }
 
   const effectFn = effect(
     () => getter(),
     {
       // lazy: true,
-      scheduler: job
+      scheduler() {
+        if (options.flush === 'post') {
+          const p = Promise.resolve()
+          p.then(job)
+        } else {
+          job()
+        }
+      }
     }
   )
 
   if (options.immediate) {
     job()
   } else {
-    effectFn()
+    oldValue = effectFn()
   }
 
 }
 
-watch(obj, () => {
-  console.log('watch实现原理')
-}, {
-  immediate: true
+watch(() => obj.foo,
+  (newValue: any, oldValue: any) => {
+    console.log(`数据发生变化， newValue:${newValue}, oldValue:${oldValue}`)
+  }, {
+  immediate: true,
+  flush: 'post'
 })
 
 setTimeout(() => {
