@@ -38,9 +38,11 @@ const activeEffectStack: EffectFn[] = []
  */
 export function reactive(data: OriginalData) {
   return new Proxy(data, {
-    get(target, key: string) {
+    get(target, key: string, receiver) {
       track(target, key)
-      return target[key]
+      // receiver 指向属性的调用者
+      return Reflect.get(target, key, receiver)
+      // return target[key]
     },
     set(target, key: string, newValue: any) {
       target[key] = newValue

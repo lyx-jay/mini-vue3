@@ -6,6 +6,7 @@
     "re": "node ./reactive/reactive.mjs",
     "computed": "ts-node src/reactive/computed.ts",
     "watch": "ts-node src/reactive/watch.ts",
+    "proxy": "ts-node src/proxy/index.ts",
     "parse": "node ./compiler/parse.mjs",
     "compile": "node ./compiler/compile.mjs",
     "reactive": "ts-node src/reactive/index.ts"
