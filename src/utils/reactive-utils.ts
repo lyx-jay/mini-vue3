@@ -69,10 +69,8 @@ export function effect(fn: Function, options: Options = {}) {
   effectFn.options = options
   if (!options.lazy) {
     effectFn()
-  } else {
-
-    return effectFn
   }
+  return effectFn
 }
 
 // 清除依赖集合中的副作用函数
@@ -126,8 +124,24 @@ export function trigger(target: OriginalData, key: string) {
   })
 }
 
+/**
+ * 读取对象上的任意属性
+ * @param value 
+ * @param seen 
+ * @returns 
+ */
+export function traverse(value: any, seen = new Set()) {
+  // 如果读取到的是原始值，或者已经被读取过了，那什么都不做
+  if (typeof value !== 'object' || value == null || seen.has(value)) return
+  // 将数据添加到 seen 中，代表已经读取过了
+  seen.add(value)
+  // 暂时不考虑数组等其他结构
+  for (const k in value) {
+    traverse(value[k], seen)
+  }
 
-
+  return value
+}
 
 
 
